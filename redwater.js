@@ -1,22 +1,43 @@
-// Sandboxels Red Water Script
-// This script turns all water into red in the Sandboxels game
+// redwater.js for Sandboxels
+(function() {
+    console.log("RedWater mod loaded!");
 
-// Wait until the game is loaded
-setTimeout(() => {
-    // Check if the pixel system exists
-    if (window.PixelManager && window.PixelManager.pixels) {
-        // Loop through all defined pixels
+    // Function to turn water red
+    function makeWaterRed() {
+        if (!window.PixelManager || !PixelManager.pixels) return false;
+
+        let changed = false;
         for (let key in PixelManager.pixels) {
             let pixel = PixelManager.pixels[key];
-
-            // If the pixel is water, change its color to red
             if (pixel.name.toLowerCase().includes("water")) {
-                pixel.color = "#FF0000"; // Bright red
+                pixel.color = "#FF0000"; // Red
+                changed = true;
             }
         }
-
-        console.log("All water pixels are now red!");
-    } else {
-        console.log("PixelManager not found. Make sure Sandboxels is loaded.");
+        return changed;
     }
-}, 1000); // 1 second delay to ensure game is fully loaded
+
+    // Try to apply immediately
+    if (!makeWaterRed()) {
+        console.log("PixelManager not ready yet, retrying...");
+    }
+
+    // Keep retrying every 500ms until successful
+    const interval = setInterval(() => {
+        if (makeWaterRed()) {
+            console.log("All water pixels are now red!");
+            clearInterval(interval); // Stop once done
+        }
+    }, 500);
+
+    // Optional: dynamically update existing water on map
+    const canvasInterval = setInterval(() => {
+        if (window.PixelManager && PixelManager.pixelArray) {
+            PixelManager.pixelArray.forEach(p => {
+                if (p?.type?.toLowerCase?.()?.includes("water")) {
+                    p.color = "#FF0000";
+                }
+            });
+        }
+    }, 1000);
+})();
